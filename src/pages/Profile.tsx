@@ -1,143 +1,186 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
+import { apiRequest } from "../services/api";
 import { Link } from "react-router-dom";
 
 const Profile: React.FC = () => {
+  const [user, setUser] = useState<any>(null);
+  const [isEditing, setIsEditing] = useState(false);
+  const [formData, setFormData] = useState({ firstname: "", lastname: "" });
+  const [loading, setLoading] = useState(false);
+
+  // 1. Fetch User Data on Load
+  useEffect(() => {
+    const fetchProfile = async () => {
+      try {
+        const res = await apiRequest("/user/me"); // Using the new UserRoutes
+        setUser(res.data);
+        setFormData({
+          firstname: res.data.firstname,
+          lastname: res.data.lastname,
+        });
+      } catch (err) {
+        console.error("Failed to load profile", err);
+      }
+    };
+    fetchProfile();
+  }, []);
+
+  // 2. Handle Profile Update
+  const handleUpdate = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+    try {
+      const res = await apiRequest("/user/update", "PUT", formData);
+      setUser(res.data);
+      setIsEditing(false);
+      alert("Profile Sync Successful! 🚀");
+    } catch (err) {
+      alert("Update failed!");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // 3. Handle Avatar Upload (Cloudinary)
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.readAsDataURL(file);
+    reader.onloadend = async () => {
+      try {
+        setLoading(true);
+        const res = await apiRequest("/user/avatar", "POST", {
+          image: reader.result,
+        });
+        setUser({ ...user, avatarUrl: res.url });
+        alert("Avatar uploaded to Cloudinary! ✨");
+      } catch (err) {
+        alert("Upload failed!");
+      } finally {
+        setLoading(false);
+      }
+    };
+  };
+
+  if (!user)
+    return <div className="p-10 font-black">INITIALIZING PLAYER...</div>;
+
   return (
-    <div className="min-h-screen font-sans overflow-hidden relative flex items-center justify-center p-4 bg-yellow-50">
-      {/* --- CODING BACKGROUND ANIMATIONS --- */}
-
-      {/* 1. Console Log (Top Left) */}
-      <div className="absolute top-10 left-10 text-4xl font-mono font-black text-gray-300 opacity-40 animate-float-slow select-none -rotate-6">
-        console.log("Hero");
+    <div className="min-h-screen bg-yellow-50 p-6 flex flex-col items-center font-sans">
+      {/* HEADER */}
+      <div className="w-full max-w-2xl flex justify-between items-center mb-10">
+        <Link
+          to="/app"
+          className="bg-white border-3 border-black px-4 py-2 rounded-xl font-black shadow-[4px_4px_0px_0px_black] hover:translate-y-1 hover:shadow-none transition-all"
+        >
+          ← BACK TO TREE
+        </Link>
+        <h1 className="text-3xl font-black uppercase italic">Player Profile</h1>
       </div>
 
-      {/* 2. Import Statement (Bottom Right) */}
-      <div className="absolute bottom-20 right-10 text-5xl font-mono font-black text-blue-200 opacity-40 animate-bounce-gentle select-none rotate-12">
-        import React
-      </div>
-
-      {/* 3. Infinite Loop (Middle Left) */}
-      <div className="absolute top-1/2 left-5 text-3xl font-mono font-black text-purple-200 opacity-30 animate-spin-slow select-none -rotate-45">
-        while(alive) {"{ code() }"}
-      </div>
-
-      {/* 4. Giant Brackets (Top Right) */}
-      <div className="absolute top-20 right-20 text-8xl font-black text-green-100 opacity-50 animate-pulse select-none z-0 pointer-events-none">
-        {"{ }"}
-      </div>
-
-      {/* 5. The Funny Comment (Bottom Left - Wiggling) */}
-      <div
-        className="absolute bottom-10 left-1/3 text-4xl font-mono font-black text-red-200 opacity-50 animate-wiggle select-none cursor-help"
-        title="Fix this later!"
-      >
-        // TODO: Sleep
-      </div>
-
-      {/* --- CHARACTER SHEET CARD --- */}
-      <div className="bg-white w-full max-w-4xl rounded-3xl border-4 border-black shadow-[10px_10px_0px_0px_rgba(0,0,0,1)] relative z-10 overflow-hidden flex flex-col md:flex-row">
-        {/* LEFT COLUMN: Avatar & Identity */}
-        <div className="bg-blue-50 p-8 md:w-1/3 border-b-4 md:border-b-0 md:border-r-4 border-black flex flex-col items-center text-center">
-          {/* Avatar Image */}
-          <div className="w-40 h-40 bg-white rounded-full border-4 border-black mb-6 overflow-hidden relative shadow-[4px_4px_0px_0px_rgba(0,0,0,0.2)] group cursor-pointer">
-            <img
-              src="https://api.dicebear.com/7.x/avataaars/svg?seed=Angelo"
-              alt="Player Avatar"
-              className="w-full h-full object-cover group-hover:scale-110 transition-transform"
-            />
-            <div className="absolute inset-0 bg-black/20 hidden group-hover:flex items-center justify-center text-white font-bold backdrop-blur-sm">
-              Edit
+      {/* PROFILE CARD */}
+      <div className="bg-white w-full max-w-md p-8 rounded-3xl border-4 border-black shadow-[10px_10px_0px_0px_rgba(0,0,0,1)] relative">
+        {/* Avatar Section */}
+        <div className="flex flex-col items-center mb-8">
+          <div className="relative group">
+            <div className="w-32 h-32 rounded-full border-4 border-black overflow-hidden bg-blue-100 shadow-[4px_4px_0px_0px_black]">
+              <img
+                src={
+                  user.avatarUrl ||
+                  `https://api.dicebear.com/7.x/avataaars/svg?seed=${user.firstname}`
+                }
+                alt="Profile"
+                className="w-full h-full object-cover"
+              />
             </div>
+            <label className="absolute bottom-0 right-0 bg-green-400 border-2 border-black p-2 rounded-full cursor-pointer hover:bg-green-300 transition-colors shadow-[2px_2px_0px_0px_black]">
+              <input
+                type="file"
+                className="hidden"
+                onChange={handleFileChange}
+                accept="image/*"
+              />
+              📸
+            </label>
           </div>
-
-          <h2 className="text-3xl font-black mb-1">Angelo</h2>
-          <span className="px-3 py-1 bg-black text-white font-mono font-bold rounded-md text-sm mb-6 border-2 border-transparent hover:border-green-400 transition">
-            &lt;FullStackDev /&gt;
-          </span>
-
-          {/* XP Bar */}
-          <div className="w-full mb-2 flex justify-between text-xs font-bold font-mono">
-            <span>XP++</span>
-            <span>450 / 1000</span>
-          </div>
-          <div className="w-full h-6 bg-gray-200 border-3 border-black rounded-lg overflow-hidden mb-8 relative">
-            <div className="h-full bg-green-400 w-[45%] border-r-3 border-black relative">
-              {/* Shiny effect on bar */}
-              <div className="absolute top-0 right-0 bottom-0 w-2 bg-white/30"></div>
-            </div>
-          </div>
-
-          <Link
-            to="/app"
-            className="w-full py-4 bg-yellow-300 border-3 border-black font-black rounded-xl hover:bg-yellow-400 shadow-[4px_4px_0px_0px_black] hover:translate-y-1 hover:shadow-none transition mb-4 flex items-center justify-center gap-2 group"
-          >
-            <span>▶</span> RESUME GAME
-          </Link>
-
-          <Link
-            to="/"
-            className="text-red-500 font-bold hover:text-red-600 font-mono text-sm"
-          >
-            System.exit(0); {/* Funny logout text */}
-          </Link>
+          <p className="mt-4 font-mono text-xs text-gray-400 uppercase tracking-widest">
+            Access_Level: {user.role[0]}
+          </p>
         </div>
 
-        {/* RIGHT COLUMN: Stats & Achievements */}
-        <div className="p-8 md:w-2/3 bg-white">
-          <h3 className="text-2xl font-black mb-6 border-b-4 border-black inline-block pb-1">
-            Player Stats {"{ }"}
-          </h3>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-            {/* Stat 1 */}
-            <div className="bg-gray-50 p-4 rounded-xl border-3 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,0.1)] hover:bg-blue-50 transition">
-              <div className="text-gray-500 font-bold text-xs uppercase font-mono mb-1">
-                const skills =
-              </div>
-              <div className="text-4xl font-black text-blue-600">12;</div>
+        {/* Info Section */}
+        {!isEditing ? (
+          <div className="space-y-4 text-center">
+            <div>
+              <p className="text-gray-400 font-bold text-xs uppercase underline decoration-blue-400">
+                Full Name
+              </p>
+              <h2 className="text-2xl font-black">
+                {user.firstname} {user.lastname}
+              </h2>
             </div>
-            {/* Stat 2 */}
-            <div className="bg-gray-50 p-4 rounded-xl border-3 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,0.1)] hover:bg-pink-50 transition">
-              <div className="text-gray-500 font-bold text-xs uppercase font-mono mb-1">
-                let dayStreak =
-              </div>
-              <div className="text-4xl font-black text-pink-500">5;</div>
+            <div>
+              <p className="text-gray-400 font-bold text-xs uppercase underline decoration-pink-400">
+                Email Address
+              </p>
+              <p className="font-bold text-lg">{user.email}</p>
             </div>
+            <button
+              onClick={() => setIsEditing(true)}
+              className="w-full py-3 bg-blue-400 border-3 border-black rounded-xl font-black shadow-[4px_4px_0px_0px_black] hover:translate-y-1 hover:shadow-none transition-all mt-4"
+            >
+              EDIT IDENTITY
+            </button>
           </div>
-
-          <h3 className="text-xl font-black mb-4 flex items-center gap-2">
-            Inventory{" "}
-            <span className="text-sm bg-gray-200 px-2 rounded-full border border-black">
-              Badges
-            </span>
-          </h3>
-
-          <div className="flex gap-4 flex-wrap">
-            {/* Badge 1 */}
-            <div className="group relative">
-              <div className="w-20 h-20 bg-orange-100 rounded-2xl border-3 border-black flex flex-col items-center justify-center shadow-[2px_2px_0px_0px_black] group-hover:-translate-y-1 transition cursor-help">
-                <span className="text-3xl mb-1">🧱</span>
-                <span className="text-[10px] font-bold font-mono">HTML</span>
-              </div>
+        ) : (
+          <form onSubmit={handleUpdate} className="space-y-4">
+            <div className="space-y-2">
+              <label className="font-black text-xs uppercase">First Name</label>
+              <input
+                value={formData.firstname}
+                onChange={(e) =>
+                  setFormData({ ...formData, firstname: e.target.value })
+                }
+                className="w-full p-2 border-2 border-black rounded-lg bg-gray-50 font-bold"
+              />
             </div>
-
-            {/* Badge 2 */}
-            <div className="group relative">
-              <div className="w-20 h-20 bg-blue-100 rounded-2xl border-3 border-black flex flex-col items-center justify-center shadow-[2px_2px_0px_0px_black] group-hover:-translate-y-1 transition cursor-help">
-                <span className="text-3xl mb-1">🎨</span>
-                <span className="text-[10px] font-bold font-mono">CSS</span>
-              </div>
+            <div className="space-y-2">
+              <label className="font-black text-xs uppercase">Last Name</label>
+              <input
+                value={formData.lastname}
+                onChange={(e) =>
+                  setFormData({ ...formData, lastname: e.target.value })
+                }
+                className="w-full p-2 border-2 border-black rounded-lg bg-gray-50 font-bold"
+              />
             </div>
-
-            {/* Badge 3 (Locked) */}
-            <div className="group relative opacity-50 grayscale">
-              <div className="w-20 h-20 bg-gray-100 rounded-2xl border-3 border-dashed border-gray-400 flex flex-col items-center justify-center">
-                <span className="text-3xl mb-1">🔒</span>
-                <span className="text-[10px] font-bold font-mono">JS</span>
-              </div>
+            <div className="flex gap-2 pt-4">
+              <button
+                type="submit"
+                className="flex-1 py-3 bg-green-400 border-3 border-black rounded-xl font-black shadow-[4px_4px_0px_0px_black]"
+              >
+                {loading ? "SYNCING..." : "SAVE"}
+              </button>
+              <button
+                type="button"
+                onClick={() => setIsEditing(false)}
+                className="flex-1 py-3 bg-gray-200 border-3 border-black rounded-xl font-black shadow-[4px_4px_0px_0px_black]"
+              >
+                CANCEL
+              </button>
             </div>
-          </div>
-        </div>
+          </form>
+        )}
+      </div>
+
+      {/* PROGRESS TRACKER (Placeholder) */}
+      <div className="w-full max-w-md mt-6 p-4 bg-white border-3 border-black rounded-2xl shadow-[4px_4px_0px_0px_black] flex items-center justify-between">
+        <span className="font-black text-sm uppercase">Skill Points:</span>
+        <span className="bg-yellow-300 px-3 py-1 border-2 border-black rounded-full font-bold">
+          1,250 XP
+        </span>
       </div>
     </div>
   );

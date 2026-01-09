@@ -1,124 +1,163 @@
 import React, { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
+import { useGoogleLogin } from "@react-oauth/google";
+import { apiRequest } from "../services/api";
 
 const Login: React.FC = () => {
   const navigate = useNavigate();
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
+  const [formData, setFormData] = useState({ email: "", password: "" });
+  const [loading, setLoading] = useState(false);
 
-  const handleLogin = (e: React.FormEvent) => {
+  // --- GOOGLE LOGIN HANDLER ---
+  const loginWithGoogle = useGoogleLogin({
+    onSuccess: async (tokenResponse) => {
+      setLoading(true);
+      try {
+        const res = await apiRequest("/auth/google", "POST", {
+          token: tokenResponse.access_token,
+        });
+        localStorage.setItem("accessToken", res.data.accessToken);
+        navigate("/app");
+      } catch (err) {
+        alert("Google Sync Failed.");
+      } finally {
+        setLoading(false);
+      }
+    },
+    onError: () => alert("Google Popup Blocked"),
+  });
+
+  const handleManualLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    navigate("/app");
+    setLoading(true);
+    try {
+      const res = await apiRequest("/auth/login", "POST", formData);
+      localStorage.setItem("accessToken", res.data.accessToken);
+      navigate("/app");
+    } catch (err: any) {
+      alert("Invalid Credentials");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-4 overflow-hidden relative font-sans bg-yellow-50">
-      {/* --- CODING BACKGROUND ANIMATIONS --- */}
-
-      {/* 1. The Git Command (Top Left) */}
-      <div className="absolute top-10 left-5 text-4xl font-mono font-black text-gray-300 opacity-40 animate-float-slow select-none -rotate-6">
-        $ git push --force
+    <div className="min-h-screen bg-[#FFFBEB] flex items-center justify-center p-6 font-sans text-black relative overflow-hidden">
+      {/* --- MOVING DOTS BACKGROUND --- */}
+      <div className="absolute inset-0 z-0 pointer-events-none">
+        <div
+          className="absolute inset-0 opacity-20"
+          style={{
+            backgroundImage: `radial-gradient(#000 1px, transparent 1px)`,
+            backgroundSize: "30px 30px",
+          }}
+        ></div>
+        {/* Animated Floating Dots */}
+        {[...Array(15)].map((_, i) => (
+          <div
+            key={i}
+            className="absolute rounded-full bg-black opacity-10 animate-pulse"
+            style={{
+              width: Math.random() * 10 + 5 + "px",
+              height: Math.random() * 10 + 5 + "px",
+              top: Math.random() * 100 + "%",
+              left: Math.random() * 100 + "%",
+              animationDelay: Math.random() * 5 + "s",
+              animationDuration: Math.random() * 10 + 5 + "s",
+            }}
+          />
+        ))}
       </div>
 
-      {/* 2. The NPM Command (Bottom Right) */}
-      <div className="absolute bottom-10 right-5 text-4xl font-mono font-black text-red-200 opacity-50 animate-bounce-gentle select-none rotate-3">
-        npm run dev
+      {/* --- FLOATING DECORATIONS --- */}
+      <div className="absolute top-10 left-10 text-6xl font-black text-blue-200 opacity-40 select-none animate-bounce">
+        {"{ }"}
       </div>
-
-      {/* 3. The 404 Error (Top Right, Spinning) */}
-      <div className="absolute top-20 right-20 text-8xl font-black text-purple-200 opacity-30 animate-spin-slow select-none pointer-events-none">
-        404
-      </div>
-
-      {/* 4. The "Bug" (Middle Left, Wiggling) */}
       <div
-        className="absolute bottom-1/3 left-10 text-6xl opacity-60 animate-wiggle select-none cursor-help"
-        title="It's not a bug, it's a feature!"
+        className="absolute bottom-20 right-10 text-7xl font-black text-pink-200 opacity-30 select-none animate-spin"
+        style={{ animationDuration: "10s" }}
       >
-        🐛
-      </div>
-
-      {/* 5. Binary Code (Center Background) */}
-      <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-9xl font-black text-blue-100 opacity-20 animate-pulse select-none pointer-events-none z-0">
-        0101
-      </div>
-
-      {/* 6. Sudo Command (Bottom Left) */}
-      <div className="absolute bottom-32 left-20 text-5xl font-mono font-black text-green-200 opacity-40 animate-float-medium select-none rotate-12">
-        sudo
+        {"( )"}
       </div>
 
       {/* --- LOGIN CARD --- */}
-      <div className="bg-white w-full max-w-md p-8 rounded-3xl border-4 border-black shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] relative z-10">
-        <div className="text-center mb-8">
-          <div className="text-6xl mb-4 animate-bounce-gentle">👋</div>
-          <h1 className="text-4xl font-black mb-2">Player 1 Ready?</h1>
-          <p className="text-gray-600 font-bold font-mono">
-            System.out.println("Welcome");
-          </p>
-        </div>
+      <div className="w-full max-w-md bg-white border-[4px] border-black rounded-[32px] shadow-[12px_12px_0px_0px_black] p-10 z-10">
+        <header className="mb-10">
+          <h1 className="text-5xl font-[900] uppercase italic tracking-tighter leading-none">
+            Login
+          </h1>
+          <div className="h-2 w-20 bg-blue-400 mt-2 border-[2px] border-black rounded-full"></div>
+        </header>
 
-        <form onSubmit={handleLogin} className="space-y-6">
-          <div className="space-y-2">
-            <label className="font-black ml-1 flex items-center gap-2">
-              Email{" "}
-              <span className="text-xs bg-blue-100 text-blue-600 px-2 py-0.5 rounded border border-blue-300 font-mono">
-                String
-              </span>
-            </label>
-            <input
-              type="email"
-              placeholder="dev@progresso.com"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              className="w-full px-4 py-3 rounded-xl border-3 border-black bg-gray-50 focus:bg-blue-50 focus:outline-none focus:shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] transition-all font-bold font-mono"
+        {/* CUTE GOOGLE BUTTON */}
+        <button
+          type="button"
+          onClick={() => loginWithGoogle()}
+          className="w-full py-4 mb-8 bg-white border-[4px] border-black rounded-2xl flex items-center justify-center gap-4 font-[900] uppercase shadow-[6px_6px_0px_0px_black] hover:translate-y-1 hover:shadow-none transition-all active:scale-95 group"
+        >
+          <svg
+            width="24"
+            height="24"
+            viewBox="0 0 48 48"
+            className="group-hover:rotate-12 transition-transform duration-300"
+          >
+            <path
+              fill="#FFC107"
+              d="M43.611,20.083H42V20H24v8h11.303c-1.649,4.657-6.08,8-11.303,8c-6.627,0-12-5.373-12-12c0-6.627,5.373-12,12-12c3.059,0,5.842,1.154,7.961,3.039l5.657-5.657C34.046,6.053,29.268,4,24,4C12.955,4,4,12.955,4,24s8.955,20,20,20s20-8.955,20-20C44,22.659,43.862,21.35,43.611,20.083z"
             />
-          </div>
+            <path
+              fill="#FF3D00"
+              d="M6.306,14.691l6.571,4.819C14.655,15.108,18.961,12,24,12c3.059,0,5.842,1.154,7.961,3.039l5.657-5.657C34.046,6.053,29.268,4,24,4C16.318,4,9.656,8.337,6.306,14.691z"
+            />
+            <path
+              fill="#4CAF50"
+              d="M24,44c5.166,0,9.86-1.977,13.409-5.192l-6.19-5.238C29.211,35.091,26.715,36,24,36c-5.202,0-9.619-3.317-11.283-7.946l-6.522,5.025C9.505,39.556,16.227,44,24,44z"
+            />
+            <path
+              fill="#1976D2"
+              d="M43.611,20.083H42V20H24v8h11.303c-0.792,2.237-2.231,4.166-4.087,5.571c0.001-0.001,0.002-0.001,0.003-0.002l6.19,5.238C36.971,39.205,44,34,44,24C44,22.659,43.862,21.35,43.611,20.083z"
+            />
+          </svg>
+          <span className="tracking-tight">Sync Google Identity</span>
+        </button>
 
-          <div className="space-y-2">
-            <label className="font-black ml-1 flex items-center gap-2">
-              Password{" "}
-              <span className="text-xs bg-red-100 text-red-600 px-2 py-0.5 rounded border border-red-300 font-mono">
-                Hash
-              </span>
-            </label>
-            <input
-              type="password"
-              placeholder="••••••••"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              className="w-full px-4 py-3 rounded-xl border-3 border-black bg-gray-50 focus:bg-pink-50 focus:outline-none focus:shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] transition-all font-bold font-mono"
-            />
-          </div>
+        {/* MANUAL FORM */}
+        <form onSubmit={handleManualLogin} className="space-y-6">
+          <input
+            type="email"
+            placeholder="PLAYER_EMAIL"
+            className="w-full p-4 border-[3px] border-black rounded-2xl font-black bg-gray-50 outline-none focus:bg-white focus:shadow-[4px_4px_0px_0px_#60A5FA] transition-all"
+            onChange={(e) =>
+              setFormData({ ...formData, email: e.target.value })
+            }
+          />
+          <input
+            type="password"
+            placeholder="SECRET_KEY"
+            className="w-full p-4 border-[3px] border-black rounded-2xl font-black bg-gray-50 outline-none focus:bg-white focus:shadow-[4px_4px_0px_0px_#F472B6] transition-all"
+            onChange={(e) =>
+              setFormData({ ...formData, password: e.target.value })
+            }
+          />
 
           <button
             type="submit"
-            className="w-full py-4 bg-green-400 hover:bg-green-300 text-black text-xl font-black rounded-xl border-3 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:translate-y-1 hover:shadow-none active:translate-y-1 active:shadow-none transition-all flex justify-center items-center gap-2 group"
+            disabled={loading}
+            className="w-full py-5 bg-[#4ADE80] border-[4px] border-black rounded-2xl font-[900] text-xl uppercase shadow-[6px_6px_0px_0px_black] hover:translate-y-1 hover:shadow-none transition-all active:bg-[#22C55E]"
           >
-            <span className="group-hover:animate-wiggle">🚀</span> EXECUTE LOGIN
+            {loading ? "SYNCING..." : "Enter_Matrix"}
           </button>
         </form>
 
-        <div className="mt-8 text-center font-mono text-sm">
-          <p className="font-bold text-gray-500">
-            // No account?
-            <br />
-            <Link
-              to="/signup"
-              className="text-blue-600 hover:underline decoration-wavy decoration-2 font-black text-base"
-            >
-              const user = new Player();
-            </Link>
-          </p>
-          <div className="mt-6">
-            <Link
-              to="/"
-              className="text-xs font-bold text-gray-400 hover:text-black transition"
-            >
-              ← cd .. (Back to Home)
-            </Link>
-          </div>
-        </div>
+        <p className="text-center mt-8 font-black text-xs uppercase tracking-widest">
+          New Player?{" "}
+          <Link
+            to="/signup"
+            className="text-blue-500 underline decoration-[3px] underline-offset-4"
+          >
+            Create_Profile
+          </Link>
+        </p>
       </div>
     </div>
   );
