@@ -13,7 +13,7 @@ const Login: React.FC = () => {
     onSuccess: async (tokenResponse) => {
       setLoading(true);
       try {
-        const res = await apiRequest("/auth/google", "POST", {
+        const res = await apiRequest("/api/progresso/auth/google", "POST", {
           token: tokenResponse.access_token,
         });
         localStorage.setItem("accessToken", res.data.accessToken);
