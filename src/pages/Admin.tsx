@@ -26,7 +26,6 @@ const Admin: React.FC = () => {
   });
 
   // 1. FETCH MATRIX DATA
-  // Updated to include the /api/progresso prefix
   const loadTree = async () => {
     try {
       const data = await apiRequest("/api/progresso/skill");
@@ -71,7 +70,6 @@ const Admin: React.FC = () => {
   }, []);
 
   // 2. AUTO-SYNC POSITION (Drag & Drop)
-  // Updated to include the /api/progresso prefix
   const onNodeDragStop = useCallback(async (_: any, node: Node) => {
     try {
       await apiRequest(`/api/progresso/skill/${node.id}/position`, "PATCH", {
@@ -84,7 +82,6 @@ const Admin: React.FC = () => {
   }, []);
 
   // 3. REMOVE NODE FROM MATRIX
-  // Updated to include the /api/progresso prefix
   const deleteNode = async (id: string) => {
     if (
       !window.confirm(
@@ -101,17 +98,19 @@ const Admin: React.FC = () => {
   };
 
   // 4. CREATE NEW SKILL NODE
-  // Updated to include the /api/progresso prefix
   const handleCreate = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     try {
+      // FIX: Ensure the entire formData object (including videoUrl and description) is sent
       await apiRequest("/api/progresso/skill", "POST", {
         ...formData,
-        position: { x: 50, y: 50 }, // Default starting position
+        position: { x: 50, y: 50 },
       });
 
       alert("Node successfully initialized at (50, 50).");
+
+      // Reset the form after success
       setFormData({
         title: "",
         description: "",
@@ -119,9 +118,13 @@ const Admin: React.FC = () => {
         videoUrl: "",
         prerequisites: [],
       });
+
+      // Refresh the local state to show the new node immediately
       loadTree();
     } catch (err) {
-      alert("Deployment failed. Check if title is unique.");
+      alert(
+        "Deployment failed. Check if title is unique or if server is down."
+      );
     } finally {
       setLoading(false);
     }
@@ -129,7 +132,7 @@ const Admin: React.FC = () => {
 
   return (
     <div className="h-screen w-screen flex flex-col md:flex-row bg-black text-green-500 font-mono">
-      {/* --- SIDEBAR: THE NODE FORGE --- */}
+      {/* SIDEBAR: THE NODE FORGE */}
       <div className="w-full md:w-80 p-5 border-r border-green-900 overflow-y-auto shrink-0 bg-zinc-950 z-20">
         <div className="mb-8">
           <h2 className="text-xl font-black text-white tracking-tighter italic">
@@ -197,6 +200,7 @@ const Admin: React.FC = () => {
               }
               className="w-full bg-black border border-green-900 p-2 h-20 text-white mt-1 outline-none focus:border-green-400"
               placeholder="Brief lesson overview..."
+              required
             />
           </div>
 
@@ -237,7 +241,6 @@ const Admin: React.FC = () => {
           </button>
         </form>
 
-        {/* REGISTRY LIST */}
         <div className="mt-10 border-t border-green-900 pt-4">
           <h3 className="text-[10px] text-white mb-3 uppercase tracking-widest underline underline-offset-4">
             Active_Nodes
@@ -263,7 +266,7 @@ const Admin: React.FC = () => {
         </div>
       </div>
 
-      {/* --- MAIN PANEL: THE MAP ARCHITECT --- */}
+      {/* MAIN PANEL: THE MAP ARCHITECT */}
       <div className="flex-grow relative overflow-hidden z-10">
         <div className="absolute top-6 left-6 z-50 bg-black/90 border border-green-500 px-4 py-2 text-[10px] uppercase tracking-[0.2em] text-green-400 font-black shadow-lg">
           Live_Map_Architect_Grid
@@ -276,7 +279,6 @@ const Admin: React.FC = () => {
           onNodeDragStop={onNodeDragStop}
           fitView
         >
-          {/* GRID BACKGROUND */}
           <Background
             variant={BackgroundVariant.Lines}
             color="#166534"
@@ -287,7 +289,6 @@ const Admin: React.FC = () => {
           <Controls className="bg-zinc-900 border-2 border-green-900 fill-green-500" />
         </ReactFlow>
 
-        {/* COORDINATE INDICATOR HUD */}
         <div className="absolute bottom-6 right-6 z-50 text-[10px] text-green-900 opacity-50 select-none">
           X_AXIS / Y_AXIS LOCK: ENABLED
         </div>
