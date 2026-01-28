@@ -2,8 +2,11 @@ import React, { useState, useEffect, useCallback } from "react";
 import ReactFlow, {
   useNodesState,
   useEdgesState,
+  addEdge, // Required to make lines stay
   Background,
   Controls,
+  type Connection, // Type for the connection event
+  type Edge, // Type for the edge state
   type Node,
   BackgroundVariant,
   MarkerType,
@@ -129,6 +132,36 @@ const Admin: React.FC = () => {
       setLoading(false);
     }
   };
+
+  const onConnect = useCallback(
+    async (params: any) => {
+      // 1. Update the UI state immediately so the line stays
+      setEdges((eds) =>
+        addEdge(
+          { ...params, animated: true, style: { stroke: "#166534" } },
+          eds
+        )
+      );
+
+      try {
+        // 2. Sync with the Matrix Database
+        // We update the 'target' node to include the 'source' as a prerequisite
+        await apiRequest(
+          `/api/progresso/skill/${params.target}/prerequisite`,
+          "PATCH",
+          {
+            prerequisiteId: params.source,
+          }
+        );
+        console.log("Neural link established in the Matrix.");
+      } catch (err) {
+        alert("Link failed to synchronize with HQ.");
+        // Rollback edges if the DB update fails
+        loadTree();
+      }
+    },
+    [setEdges]
+  );
 
   return (
     <div className="h-screen w-screen flex flex-col md:flex-row bg-black text-green-500 font-mono">
