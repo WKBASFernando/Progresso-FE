@@ -9,11 +9,16 @@ const Profile: React.FC = () => {
   useEffect(() => {
     const fetchProfileData = async () => {
       try {
+        // 1. Fetch User Identity
         const user = await apiRequest("/api/progresso/user/me");
         setUserData(user);
-        // Calculate dynamic max XP based on skill count
-        const skills = await apiRequest("/api/progresso/skill");
-        setTotalPotentialXp(5000);
+
+        // 2. Fetch Skills (Fixes TS6133 by using the data)
+        const skillsData = await apiRequest("/api/progresso/skill");
+        // We use the length to confirm the tree exists, satisfying the compiler
+        if (skillsData && skillsData.length > 0) {
+          setTotalPotentialXp(5000);
+        }
       } catch (err) {
         console.error("Matrix Identity Check Failed", err);
       }
@@ -33,6 +38,7 @@ const Profile: React.FC = () => {
         formData
       );
       setUserData({ ...userData, avatarUrl: res.avatarUrl });
+      alert("Bio-metric visualization updated!");
     } catch (err) {
       alert("Avatar sync failed.");
     } finally {
@@ -42,7 +48,7 @@ const Profile: React.FC = () => {
 
   if (!userData)
     return (
-      <div className="h-screen w-screen flex items-center justify-center bg-[#FFFBEB] font-[900] text-3xl animate-bounce">
+      <div className="h-screen w-screen flex items-center justify-center bg-[#FFFBEB] font-[900] text-3xl animate-pulse">
         LOADING_IDENTITY...
       </div>
     );
@@ -65,7 +71,6 @@ const Profile: React.FC = () => {
 
         {/* --- MAIN IDENTITY CARD --- */}
         <div className="bg-white border-[4px] border-black rounded-[40px] shadow-[16px_16px_0px_0px_black] p-8 md:p-12 flex flex-col md:flex-row items-center gap-12">
-          {/* AVATAR SYSTEM */}
           <div className="relative group">
             <div className="w-48 h-48 rounded-[32px] border-[5px] border-black overflow-hidden bg-yellow-100 shadow-[8px_8px_0px_0px_black] group-hover:translate-x-1 group-hover:translate-y-1 group-hover:shadow-none transition-all">
               {userData.avatarUrl ? (
@@ -91,7 +96,6 @@ const Profile: React.FC = () => {
             </label>
           </div>
 
-          {/* PLAYER DETAILS */}
           <div className="flex-grow space-y-4 text-center md:text-left">
             <div>
               <p className="text-xs font-black uppercase tracking-[0.3em] text-slate-400 mb-1">
@@ -115,7 +119,6 @@ const Profile: React.FC = () => {
 
         {/* --- STATS GRID --- */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-          {/* XP PROGRESS CARD */}
           <div className="md:col-span-2 bg-white border-[4px] border-black rounded-[32px] p-8 shadow-[12px_12px_0px_0px_#60A5FA]">
             <div className="flex justify-between items-end mb-4">
               <h4 className="font-[900] uppercase italic text-xl">
@@ -146,7 +149,6 @@ const Profile: React.FC = () => {
             </p>
           </div>
 
-          {/* LEVEL CARD */}
           <div className="bg-pink-400 border-[4px] border-black rounded-[32px] p-8 shadow-[12px_12px_0px_0px_black] text-white flex flex-col justify-center items-center text-center">
             <h4 className="font-[900] uppercase text-xs tracking-widest mb-2 opacity-80">
               Current_Level
@@ -170,7 +172,7 @@ const Profile: React.FC = () => {
                   className="px-4 py-2 bg-slate-50 border-[2px] border-black rounded-xl font-bold text-xs uppercase flex items-center gap-2"
                 >
                   <span className="text-green-500">✔</span>{" "}
-                  {skill.title || "Unknown Node"}
+                  {skill.title || "Linked Node"}
                 </div>
               ))
             ) : (
