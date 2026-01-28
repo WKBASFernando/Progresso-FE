@@ -12,8 +12,6 @@ import Dashboard from "./pages/Dashboard";
 import Profile from "./pages/Profile";
 import Admin from "./pages/Admin";
 
-// --- PROTECTED ROUTE COMPONENT ---
-// This checks if the user has a token before letting them in
 const ProtectedRoute = ({
   children,
   requiredRole,
