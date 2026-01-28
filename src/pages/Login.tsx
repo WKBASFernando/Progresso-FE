@@ -13,27 +13,39 @@ const Login: React.FC = () => {
     onSuccess: async (tokenResponse) => {
       setLoading(true);
       try {
+        // Updated path to include the /api/progresso prefix
         const res = await apiRequest("/api/progresso/auth/google", "POST", {
           token: tokenResponse.access_token,
         });
         localStorage.setItem("accessToken", res.data.accessToken);
-        navigate("/app");
+
+        // Updated navigate to match your live dashboard route
+        navigate("/dashboard");
       } catch (err) {
-        alert("Google Sync Failed.");
+        alert(
+          "Google Sync Failed. Check if Redirect URIs are set in Google Console."
+        );
       } finally {
         setLoading(false);
       }
     },
-    onError: () => alert("Google Popup Blocked"),
+    onError: () => alert("Google Popup Blocked or Closed"),
   });
 
   const handleManualLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     try {
-      const res = await apiRequest("/auth/login", "POST", formData);
+      // Updated path to include the /api/progresso prefix
+      const res = await apiRequest(
+        "/api/progresso/auth/login",
+        "POST",
+        formData
+      );
       localStorage.setItem("accessToken", res.data.accessToken);
-      navigate("/app");
+
+      // Updated navigate to match your live dashboard route
+      navigate("/dashboard");
     } catch (err: any) {
       alert("Invalid Credentials");
     } finally {
@@ -52,7 +64,6 @@ const Login: React.FC = () => {
             backgroundSize: "30px 30px",
           }}
         ></div>
-        {/* Animated Floating Dots */}
         {[...Array(15)].map((_, i) => (
           <div
             key={i}

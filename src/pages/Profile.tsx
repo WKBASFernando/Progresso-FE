@@ -9,10 +9,11 @@ const Profile: React.FC = () => {
   const [loading, setLoading] = useState(false);
 
   // 1. Fetch User Data on Load
+  // Updated path to include the /api/progresso prefix
   useEffect(() => {
     const fetchProfile = async () => {
       try {
-        const res = await apiRequest("/user/me"); // Using the new UserRoutes
+        const res = await apiRequest("/api/progresso/user/me");
         setUser(res.data);
         setFormData({
           firstname: res.data.firstname,
@@ -26,11 +27,16 @@ const Profile: React.FC = () => {
   }, []);
 
   // 2. Handle Profile Update
+  // Updated path to include the /api/progresso prefix
   const handleUpdate = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     try {
-      const res = await apiRequest("/user/update", "PUT", formData);
+      const res = await apiRequest(
+        "/api/progresso/user/update",
+        "PUT",
+        formData
+      );
       setUser(res.data);
       setIsEditing(false);
       alert("Profile Sync Successful! 🚀");
@@ -41,7 +47,8 @@ const Profile: React.FC = () => {
     }
   };
 
-  // 3. Handle Avatar Upload (Cloudinary)
+  // 3. Handle Avatar Upload
+  // Updated path to include the /api/progresso prefix
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -51,7 +58,7 @@ const Profile: React.FC = () => {
     reader.onloadend = async () => {
       try {
         setLoading(true);
-        const res = await apiRequest("/user/avatar", "POST", {
+        const res = await apiRequest("/api/progresso/user/avatar", "POST", {
           image: reader.result,
         });
         setUser({ ...user, avatarUrl: res.url });
@@ -72,7 +79,7 @@ const Profile: React.FC = () => {
       {/* HEADER */}
       <div className="w-full max-w-2xl flex justify-between items-center mb-10">
         <Link
-          to="/app"
+          to="/dashboard" // Updated to match your Dashboard route
           className="bg-white border-3 border-black px-4 py-2 rounded-xl font-black shadow-[4px_4px_0px_0px_black] hover:translate-y-1 hover:shadow-none transition-all"
         >
           ← BACK TO TREE
@@ -175,7 +182,7 @@ const Profile: React.FC = () => {
         )}
       </div>
 
-      {/* PROGRESS TRACKER (Placeholder) */}
+      {/* PROGRESS TRACKER */}
       <div className="w-full max-w-md mt-6 p-4 bg-white border-3 border-black rounded-2xl shadow-[4px_4px_0px_0px_black] flex items-center justify-between">
         <span className="font-black text-sm uppercase">Skill Points:</span>
         <span className="bg-yellow-300 px-3 py-1 border-2 border-black rounded-full font-bold">

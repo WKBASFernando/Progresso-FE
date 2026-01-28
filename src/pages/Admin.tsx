@@ -26,9 +26,10 @@ const Admin: React.FC = () => {
   });
 
   // 1. FETCH MATRIX DATA
+  // Updated to include the /api/progresso prefix
   const loadTree = async () => {
     try {
-      const data = await apiRequest("/skill");
+      const data = await apiRequest("/api/progresso/skill");
 
       // Map MongoDB data to ReactFlow Nodes
       const formattedNodes = data.map((s: any) => ({
@@ -70,9 +71,10 @@ const Admin: React.FC = () => {
   }, []);
 
   // 2. AUTO-SYNC POSITION (Drag & Drop)
+  // Updated to include the /api/progresso prefix
   const onNodeDragStop = useCallback(async (_: any, node: Node) => {
     try {
-      await apiRequest(`/skill/${node.id}/position`, "PATCH", {
+      await apiRequest(`/api/progresso/skill/${node.id}/position`, "PATCH", {
         position: node.position,
       });
       console.log(`Node ${node.id} synced at`, node.position);
@@ -82,6 +84,7 @@ const Admin: React.FC = () => {
   }, []);
 
   // 3. REMOVE NODE FROM MATRIX
+  // Updated to include the /api/progresso prefix
   const deleteNode = async (id: string) => {
     if (
       !window.confirm(
@@ -90,7 +93,7 @@ const Admin: React.FC = () => {
     )
       return;
     try {
-      await apiRequest(`/skill/${id}`, "DELETE");
+      await apiRequest(`/api/progresso/skill/${id}`, "DELETE");
       loadTree();
     } catch (err) {
       alert("System could not delete node.");
@@ -98,12 +101,12 @@ const Admin: React.FC = () => {
   };
 
   // 4. CREATE NEW SKILL NODE
+  // Updated to include the /api/progresso prefix
   const handleCreate = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     try {
-      // Send link directly to backend - no file upload needed
-      await apiRequest("/skill", "POST", {
+      await apiRequest("/api/progresso/skill", "POST", {
         ...formData,
         position: { x: 50, y: 50 }, // Default starting position
       });

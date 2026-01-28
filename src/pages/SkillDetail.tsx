@@ -23,8 +23,8 @@ const SkillDetail: React.FC = () => {
     const fetchSkillData = async () => {
       try {
         setLoading(true);
-        // GET /api/progresso/skill/:id
-        const res = await apiRequest(`/skill/${id}`);
+        // Updated path to include the /api/progresso prefix
+        const res = await apiRequest(`/api/progresso/skill/${id}`);
         setSkill(res);
       } catch (err) {
         console.error("Transmission Error:", err);
@@ -47,7 +47,7 @@ const SkillDetail: React.FC = () => {
       <div className="h-screen w-screen flex flex-col items-center justify-center bg-yellow-50 font-black">
         <p className="text-xl mb-4 text-red-600">⚠ ERROR: NODE_NOT_FOUND</p>
         <Link
-          to="/app"
+          to="/dashboard" // Updated to match your Dashboard route
           className="bg-white border-4 border-black px-6 py-2 shadow-[4px_4px_0px_0px_black] hover:translate-y-1 hover:shadow-none transition-all"
         >
           RETURN TO MAP
@@ -61,7 +61,7 @@ const SkillDetail: React.FC = () => {
         {/* TOP NAVIGATION */}
         <div className="flex justify-between items-center mb-8">
           <Link
-            to="/app"
+            to="/dashboard" // Updated to match your Dashboard route
             className="bg-white border-3 border-black px-6 py-2 rounded-xl font-black shadow-[4px_4px_0px_0px_black] hover:translate-y-1 hover:shadow-none transition-all uppercase text-sm"
           >
             ← Back to Matrix
@@ -85,7 +85,6 @@ const SkillDetail: React.FC = () => {
         </div>
 
         {/* VIDEO PLAYER SECTION */}
-
         <div className="border-4 border-black shadow-[15px_15px_0px_0px_black] rounded-3xl overflow-hidden bg-black aspect-video relative group">
           {skill.videoUrl ? (
             <iframe
@@ -107,7 +106,6 @@ const SkillDetail: React.FC = () => {
 
         {/* DESCRIPTION & INTEL */}
         <div className="mt-12 grid grid-cols-1 md:grid-cols-3 gap-8">
-          {/* Main Info */}
           <div className="md:col-span-2 bg-white p-8 border-4 border-black rounded-3xl shadow-[8px_8px_0px_0px_rgba(0,0,0,1)]">
             <h3 className="font-black text-2xl mb-4 underline decoration-pink-400 decoration-4">
               Mission Intelligence:
@@ -118,7 +116,6 @@ const SkillDetail: React.FC = () => {
             </p>
           </div>
 
-          {/* Side Info */}
           <div className="flex flex-col gap-6">
             <div className="bg-blue-400 p-6 border-4 border-black rounded-3xl shadow-[8px_8px_0px_0px_black] text-white">
               <p className="font-black text-xs uppercase mb-1 opacity-80">
@@ -143,7 +140,6 @@ const SkillDetail: React.FC = () => {
           </div>
         </div>
 
-        {/* FOOTER SPACING */}
         <div className="h-20"></div>
       </div>
     </div>

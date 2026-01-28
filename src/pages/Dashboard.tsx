@@ -48,17 +48,16 @@ const Dashboard: React.FC = () => {
   useEffect(() => {
     const loadData = async () => {
       try {
-        // Fetch Player Stats
-        const userRes = await apiRequest("/auth/me");
+        // Updated path to include the /api/progresso prefix
+        const userRes = await apiRequest("/api/progresso/auth/me");
         setUser(userRes.data);
 
-        // Fetch Live Skills from MongoDB
-        const skillsData = await apiRequest("/skill");
+        // Updated path to include the /api/progresso prefix
+        const skillsData = await apiRequest("/api/progresso/skill");
 
         // Map to Cartoon Nodes
         const formattedNodes = skillsData.map((skill: any) => ({
           id: skill._id,
-          // Uses the X/Y coordinates set in the Admin Forge
           position: skill.position || { x: 250, y: 0 },
           data: { label: skill.title },
           style: {
@@ -92,13 +91,12 @@ const Dashboard: React.FC = () => {
 
   // --- 3. LESSON NAVIGATION ---
   const handleNodeClick = (_: any, node: Node) => {
-    // Navigate to the video page for this specific node ID
     navigate(`/skill/${node.id}`);
   };
 
   return (
     <div className="h-screen w-screen flex flex-col font-sans relative overflow-hidden bg-white">
-      {/* --- DECORATIVE CODING ELEMENTS --- */}
+      {/* DECORATIVE CODING ELEMENTS */}
       <div className="absolute top-10 left-10 text-8xl font-mono font-black text-gray-100 opacity-50 z-0 select-none pointer-events-none">
         {"< >"}
       </div>
@@ -154,7 +152,7 @@ const Dashboard: React.FC = () => {
           edges={edges}
           onNodesChange={onNodesChange}
           onEdgesChange={onEdgesChange}
-          onNodeClick={handleNodeClick} // <-- TRiggers the video navigation
+          onNodeClick={handleNodeClick}
           fitView
           defaultViewport={{ x: 0, y: 0, zoom: 1 }}
         >

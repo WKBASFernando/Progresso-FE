@@ -11,7 +11,6 @@ const Signup: React.FC = () => {
     lastname: "",
     email: "",
     password: "",
-    // Role is removed from UI and handled by backend default (USER)
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
@@ -23,13 +22,14 @@ const Signup: React.FC = () => {
     setError("");
 
     try {
-      // We send the data without the role; backend defaults it to Role.USER
-      const result = await apiRequest("/auth/register", "POST", {
+      // Updated path to include the /api/progresso prefix
+      const result = await apiRequest("/api/progresso/auth/register", "POST", {
         ...formData,
         role: "USER", // Explicitly setting it to USER for the API call
       });
 
-      if (result.message.includes("successfully")) {
+      if (result.message.toLowerCase().includes("successfully")) {
+        alert("Registration Successful! Redirecting to login...");
         navigate("/login");
       }
     } catch (err: any) {
@@ -44,8 +44,8 @@ const Signup: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-4 overflow-hidden relative font-sans">
-      {/* --- PREVIOUS THEME BACKGROUND ANIMATIONS --- */}
+    <div className="min-h-screen flex items-center justify-center p-4 overflow-hidden relative font-sans bg-slate-50">
+      {/* --- BACKGROUND ANIMATIONS --- */}
       <div className="absolute top-10 left-5 text-4xl font-mono font-black text-gray-400 opacity-20 animate-float-slow select-none -rotate-6">
         $ git init
       </div>
@@ -57,12 +57,6 @@ const Signup: React.FC = () => {
       </div>
       <div className="absolute bottom-1/3 left-10 text-6xl opacity-30 animate-wiggle select-none cursor-help">
         🌱
-      </div>
-      <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-9xl font-black text-slate-800 opacity-5 animate-pulse select-none pointer-events-none z-0">
-        1010
-      </div>
-      <div className="absolute bottom-32 left-20 text-5xl font-mono font-black text-green-400 opacity-20 animate-float-medium select-none rotate-12">
-        chmod +x
       </div>
 
       {/* --- SIGNUP CARD --- */}
@@ -150,7 +144,7 @@ const Signup: React.FC = () => {
           <button
             type="submit"
             disabled={loading}
-            className={`w-full py-4 bg-blue-500 hover:bg-blue-400 text-white text-xl font-black rounded-xl border-3 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:translate-y-1 hover:shadow-none active:translate-y-1 active:shadow-none transition-all flex justify-center items-center gap-2 group mt-4 ${
+            className={`w-full py-4 bg-blue-500 hover:bg-blue-400 text-white text-xl font-black rounded-xl border-3 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:translate-y-1 hover:shadow-none transition-all flex justify-center items-center gap-2 mt-4 ${
               loading ? "opacity-50" : ""
             }`}
           >

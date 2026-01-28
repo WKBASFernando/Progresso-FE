@@ -5,32 +5,25 @@ const Landing: React.FC = () => {
   return (
     <div className="relative min-h-screen font-sans overflow-hidden selection:bg-pink-300 selection:text-black">
       {/* --- PROGRAMMING BACKGROUND PARTICLES --- */}
-
-      {/* 1. Giant React Tag (Top Left) */}
       <div className="absolute top-10 -left-10 text-9xl font-mono font-black text-pink-200 opacity-30 animate-float-slow z-0 select-none pointer-events-none rotate-12">
         {"<div />"}
       </div>
 
-      {/* 2. Curly Braces (Top Right) */}
       <div className="absolute top-20 -right-5 text-8xl font-mono font-black text-blue-200 opacity-30 animate-float-medium z-0 select-none pointer-events-none -rotate-12">
         {"{ }"}
       </div>
 
-      {/* 3. Logic Operator (Bottom Left) */}
       <div className="absolute bottom-40 left-10 text-7xl font-mono font-black text-green-200 opacity-30 animate-bounce-gentle z-0 select-none pointer-events-none">
         {"&&"}
       </div>
 
-      {/* 4. Not Equal (Bottom Right) */}
       <div className="absolute bottom-20 right-20 text-8xl font-mono font-black text-purple-200 opacity-20 animate-spin-slow z-0 select-none pointer-events-none">
         {"!="}
       </div>
 
-      {/* 5. Array (Center Background) */}
       <div className="absolute top-1/2 left-1/3 text-9xl font-mono font-black text-yellow-100 opacity-40 animate-pulse z-0 select-none pointer-events-none">
         {"[ ]"}
       </div>
-      {/* ------------------------------------------ */}
 
       {/* NAVBAR */}
       <nav className="relative flex items-center justify-between px-8 py-6 border-b-4 border-black bg-white sticky top-0 z-50">
@@ -45,7 +38,7 @@ const Landing: React.FC = () => {
             Log In
           </Link>
           <Link
-            to="/app"
+            to="/dashboard" // Updated to match your Dashboard route
             className="px-6 py-3 bg-blue-400 text-black text-lg font-bold border-3 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:translate-y-1 hover:shadow-none transition-all rounded-xl"
           >
             Start Playing!
@@ -77,7 +70,7 @@ const Landing: React.FC = () => {
 
         <div className="flex gap-6">
           <Link
-            to="/app"
+            to="/dashboard" // Updated to match your Dashboard route
             className="px-10 py-5 bg-pink-400 text-black text-xl font-bold rounded-2xl border-4 border-black shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] hover:bg-pink-300 hover:-translate-y-1 transition-transform"
           >
             Launch Tree 🌳

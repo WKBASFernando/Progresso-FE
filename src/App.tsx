@@ -11,6 +11,7 @@ import Signup from "./pages/Signup";
 import Dashboard from "./pages/Dashboard";
 import Profile from "./pages/Profile";
 import Admin from "./pages/Admin";
+import SkillDetail from "./pages/SkillDetail";
 
 const ProtectedRoute = ({
   children,
@@ -26,8 +27,9 @@ const ProtectedRoute = ({
     return <Navigate to="/login" replace />;
   }
 
+  // If a specific role is required (like ADMIN) and user doesn't have it
   if (requiredRole && userRole !== requiredRole) {
-    return <Navigate to="/app" replace />;
+    return <Navigate to="/dashboard" replace />;
   }
 
   return <>{children}</>;
@@ -42,14 +44,25 @@ const App: React.FC = () => {
         <Route path="/login" element={<Login />} />
         <Route path="/signup" element={<Signup />} />
 
+        {/* Protected Student Routes */}
         <Route
-          path="/app"
+          path="/dashboard"
           element={
             <ProtectedRoute>
               <Dashboard />
             </ProtectedRoute>
           }
         />
+
+        <Route
+          path="/skill/:id"
+          element={
+            <ProtectedRoute>
+              <SkillDetail />
+            </ProtectedRoute>
+          }
+        />
+
         <Route
           path="/profile"
           element={
@@ -59,6 +72,7 @@ const App: React.FC = () => {
           }
         />
 
+        {/* Protected Admin Routes */}
         <Route
           path="/admin"
           element={
@@ -68,6 +82,7 @@ const App: React.FC = () => {
           }
         />
 
+        {/* Catch-all: Redirects any unknown URL to Landing */}
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </Router>
