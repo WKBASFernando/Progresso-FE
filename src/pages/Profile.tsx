@@ -13,11 +13,10 @@ const Profile: React.FC = () => {
         setUserData(user);
 
         // 2. Fetch Skills to calculate Total XP (Right Side)
-        const skills = await apiRequest("/api/progresso/skill");
-
-        // We calculate based on our backend logic: (5000 / total) * total = 5000
-        // But it's safer to sum them up or use your 'Mastery' constant
+        // AFTER (Build will now pass)
+        await apiRequest("/api/progresso/skill"); // You can keep the fetch to ensure data is there
         setTotalPotentialXp(5000);
+        
       } catch (err) {
         console.error("Profile sync failed");
       }
