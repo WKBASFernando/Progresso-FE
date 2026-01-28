@@ -25,21 +25,24 @@ const Landing: React.FC = () => {
         {"[ ]"}
       </div>
 
-      {/* NAVBAR */}
-      <nav className="relative flex items-center justify-between px-8 py-6 border-b-4 border-black bg-white sticky top-0 z-50">
-        <div className="text-3xl font-black tracking-wider text-black flex items-center gap-2 transform -rotate-2">
+      {/* --- NAVBAR (FIXED FOR MOBILE) --- */}
+      <nav className="relative flex flex-col md:flex-row items-center justify-between px-8 py-6 border-b-4 border-black bg-white sticky top-0 z-50 gap-4">
+        {/* LOGO */}
+        <div className="text-3xl font-black tracking-wider text-black flex items-center gap-2 transform -rotate-2 self-start md:self-auto">
           🚀 Progresso<span className="text-purple-500">.</span>
         </div>
-        <div className="space-x-4">
+
+        {/* BUTTONS GROUP */}
+        <div className="flex w-full md:w-auto gap-4 justify-center md:justify-end">
           <Link
             to="/login"
-            className="text-black font-bold hover:underline decoration-wavy decoration-2 decoration-pink-500 text-lg"
+            className="flex-1 md:flex-none text-center px-4 py-3 text-black font-bold hover:underline decoration-wavy decoration-2 decoration-pink-500 text-lg border-2 border-transparent hover:border-black rounded-xl transition-all"
           >
             Log In
           </Link>
           <Link
-            to="/dashboard" // Updated to match your Dashboard route
-            className="px-6 py-3 bg-blue-400 text-black text-lg font-bold border-3 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:translate-y-1 hover:shadow-none transition-all rounded-xl"
+            to="/dashboard"
+            className="flex-1 md:flex-none text-center px-6 py-3 bg-blue-400 text-black text-lg font-bold border-2 md:border-3 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:translate-y-1 hover:shadow-none transition-all rounded-xl"
           >
             Start Playing!
           </Link>
@@ -70,7 +73,7 @@ const Landing: React.FC = () => {
 
         <div className="flex gap-6">
           <Link
-            to="/dashboard" // Updated to match your Dashboard route
+            to="/dashboard"
             className="px-10 py-5 bg-pink-400 text-black text-xl font-bold rounded-2xl border-4 border-black shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] hover:bg-pink-300 hover:-translate-y-1 transition-transform"
           >
             Launch Tree 🌳
