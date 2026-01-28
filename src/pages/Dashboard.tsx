@@ -10,6 +10,7 @@ import ReactFlow, {
 } from "reactflow";
 import { Link, useNavigate } from "react-router-dom";
 import { apiRequest } from "../services/api";
+import ChatBot from "../components/ChatBot"; // <--- IMPORT THE CHATBOT
 import "reactflow/dist/style.css";
 
 // --- 1. CARTOON UI STYLING ---
@@ -95,7 +96,7 @@ const Dashboard: React.FC = () => {
   return (
     <div className="h-screen w-screen flex flex-col font-sans relative overflow-hidden bg-[#fffdf5]">
       {/* --- DYNAMIC BACKGROUND PATTERN --- */}
-      {/* 1. Dot Grid Pattern (CSS-in-JS for SVG background) */}
+      {/* 1. Dot Grid Pattern */}
       <div
         className="absolute inset-0 z-0 pointer-events-none opacity-40"
         style={{
@@ -185,7 +186,7 @@ const Dashboard: React.FC = () => {
           fitView
           defaultViewport={{ x: 0, y: 0, zoom: 1 }}
         >
-          {/* We keep the grid but make it subtle to blend with our custom background */}
+          {/* Subtle Grid */}
           <Background
             color="#000"
             gap={30}
@@ -202,6 +203,9 @@ const Dashboard: React.FC = () => {
           Tap a node to begin transmission
         </p>
       </div>
+
+      {/* --- AI CHATBOT INTEGRATION --- */}
+      <ChatBot currentSkill="Skill Tree Map" />
     </div>
   );
 };
