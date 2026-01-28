@@ -3,7 +3,6 @@ import ReactFlow, {
   Background,
   Controls,
   type Node,
-  type Edge,
   useNodesState,
   useEdgesState,
   Position,

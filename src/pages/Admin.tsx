@@ -13,7 +13,7 @@ import "reactflow/dist/style.css";
 
 const Admin: React.FC = () => {
   const [nodes, setNodes, onNodesChange] = useNodesState([]);
-  const [edges, setEdges, onEdgesChange] = useEdgesState([]);
+  const [edges, setEdges] = useEdgesState([]);
   const [loading, setLoading] = useState(false);
 
   // --- FORM STATE ---

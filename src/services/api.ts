@@ -1,4 +1,4 @@
-const BASE_URL = "http://localhost:5000/api/progresso";
+const BASE_URL = "https://joyous-ivory-ijse-1522b5af.koyeb.app";
 
 export const apiRequest = async (
   endpoint: string,
