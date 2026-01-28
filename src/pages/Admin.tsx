@@ -2,11 +2,11 @@ import React, { useState, useEffect, useCallback } from "react";
 import ReactFlow, {
   useNodesState,
   useEdgesState,
-  addEdge, // Required to make lines stay
+  addEdge,
   Background,
   Controls,
-  type Connection, // Type for the connection event
-  type Edge, // Type for the edge state
+  type Connection,
+  type Edge,
   type Node,
   BackgroundVariant,
   MarkerType,
@@ -16,7 +16,7 @@ import "reactflow/dist/style.css";
 
 const Admin: React.FC = () => {
   const [nodes, setNodes, onNodesChange] = useNodesState([]);
-  const [edges, setEdges] = useEdgesState([]);
+  const [edges, setEdges, onEdgesChange] = useEdgesState([]);
   const [loading, setLoading] = useState(false);
 
   // --- FORM STATE ---
@@ -70,6 +70,7 @@ const Admin: React.FC = () => {
 
   useEffect(() => {
     loadTree();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // 2. AUTO-SYNC POSITION (Drag & Drop)
@@ -84,7 +85,41 @@ const Admin: React.FC = () => {
     }
   }, []);
 
-  // 3. REMOVE NODE FROM MATRIX
+  // 3. ESTABLISH NEURAL LINK (Drawing Lines)
+  const onConnect = useCallback(
+    async (params: Connection | Edge) => {
+      // Update UI immediately so the line stays visible
+      setEdges((eds) =>
+        addEdge(
+          {
+            ...params,
+            animated: true,
+            style: { stroke: "#166534", strokeWidth: 2 },
+            markerEnd: { type: MarkerType.ArrowClosed, color: "#166534" },
+          },
+          eds
+        )
+      );
+
+      try {
+        // Sync the prerequisite to the backend
+        await apiRequest(
+          `/api/progresso/skill/${params.target}/prerequisite`,
+          "PATCH",
+          {
+            prerequisiteId: params.source,
+          }
+        );
+        console.log("Neural link established in the Matrix.");
+      } catch (err) {
+        alert("Link failed to synchronize with HQ.");
+        loadTree(); // Rollback on failure
+      }
+    },
+    [setEdges]
+  );
+
+  // 4. REMOVE NODE FROM MATRIX
   const deleteNode = async (id: string) => {
     if (
       !window.confirm(
@@ -100,20 +135,17 @@ const Admin: React.FC = () => {
     }
   };
 
-  // 4. CREATE NEW SKILL NODE
+  // 5. CREATE NEW SKILL NODE
   const handleCreate = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     try {
-      // FIX: Ensure the entire formData object (including videoUrl and description) is sent
       await apiRequest("/api/progresso/skill", "POST", {
         ...formData,
         position: { x: 50, y: 50 },
       });
 
-      alert("Node successfully initialized at (50, 50).");
-
-      // Reset the form after success
+      alert("Node successfully initialized.");
       setFormData({
         title: "",
         description: "",
@@ -121,47 +153,13 @@ const Admin: React.FC = () => {
         videoUrl: "",
         prerequisites: [],
       });
-
-      // Refresh the local state to show the new node immediately
       loadTree();
     } catch (err) {
-      alert(
-        "Deployment failed. Check if title is unique or if server is down."
-      );
+      alert("Deployment failed. Check if title is unique.");
     } finally {
       setLoading(false);
     }
   };
-
-  const onConnect = useCallback(
-    async (params: any) => {
-      // 1. Update the UI state immediately so the line stays
-      setEdges((eds) =>
-        addEdge(
-          { ...params, animated: true, style: { stroke: "#166534" } },
-          eds
-        )
-      );
-
-      try {
-        // 2. Sync with the Matrix Database
-        // We update the 'target' node to include the 'source' as a prerequisite
-        await apiRequest(
-          `/api/progresso/skill/${params.target}/prerequisite`,
-          "PATCH",
-          {
-            prerequisiteId: params.source,
-          }
-        );
-        console.log("Neural link established in the Matrix.");
-      } catch (err) {
-        alert("Link failed to synchronize with HQ.");
-        // Rollback edges if the DB update fails
-        loadTree();
-      }
-    },
-    [setEdges]
-  );
 
   return (
     <div className="h-screen w-screen flex flex-col md:flex-row bg-black text-green-500 font-mono">
@@ -216,7 +214,7 @@ const Admin: React.FC = () => {
               onChange={(e) =>
                 setFormData({ ...formData, videoUrl: e.target.value })
               }
-              className="w-full bg-black border border-green-900 p-2 text-white mt-1 outline-none focus:border-green-400"
+              className="w-full bg-black border border-green-900 p-2 text-white mt-1 outline-none"
               placeholder="https://youtube.com/..."
               required
             />
@@ -231,51 +229,23 @@ const Admin: React.FC = () => {
               onChange={(e) =>
                 setFormData({ ...formData, description: e.target.value })
               }
-              className="w-full bg-black border border-green-900 p-2 h-20 text-white mt-1 outline-none focus:border-green-400"
+              className="w-full bg-black border border-green-900 p-2 h-20 text-white mt-1 outline-none"
               placeholder="Brief lesson overview..."
               required
             />
           </div>
 
-          <div>
-            <label className="text-green-800 uppercase font-bold">
-              Prerequisites
-            </label>
-            <select
-              multiple
-              className="w-full bg-black border border-green-900 p-2 h-24 text-white mt-1"
-              onChange={(e) =>
-                setFormData({
-                  ...formData,
-                  prerequisites: Array.from(
-                    e.target.selectedOptions,
-                    (o) => o.value
-                  ),
-                })
-              }
-            >
-              {nodes.map((n) => (
-                <option key={n.id} value={n.id}>
-                  {n.data.label}
-                </option>
-              ))}
-            </select>
-            <p className="text-[9px] text-gray-600 mt-1 italic">
-              // Hold Ctrl to select multiple
-            </p>
-          </div>
-
           <button
             type="submit"
             disabled={loading}
-            className="w-full py-4 bg-green-700 text-black font-black hover:bg-green-400 transition uppercase shadow-[0_0_15px_rgba(34,197,94,0.2)]"
+            className="w-full py-4 bg-green-700 text-black font-black hover:bg-green-400 transition uppercase"
           >
             {loading ? "UPLOADING_INTEL..." : "DEPLOY_NODE"}
           </button>
         </form>
 
         <div className="mt-10 border-t border-green-900 pt-4">
-          <h3 className="text-[10px] text-white mb-3 uppercase tracking-widest underline underline-offset-4">
+          <h3 className="text-[10px] text-white mb-3 uppercase tracking-widest">
             Active_Nodes
           </h3>
           <div className="space-y-2 max-h-40 overflow-y-auto pr-2">
@@ -289,7 +259,7 @@ const Admin: React.FC = () => {
                 </span>
                 <button
                   onClick={() => deleteNode(n.id)}
-                  className="text-red-500 hover:text-white transition-colors"
+                  className="text-red-500 hover:text-white"
                 >
                   DEL
                 </button>
@@ -301,7 +271,7 @@ const Admin: React.FC = () => {
 
       {/* MAIN PANEL: THE MAP ARCHITECT */}
       <div className="flex-grow relative overflow-hidden z-10">
-        <div className="absolute top-6 left-6 z-50 bg-black/90 border border-green-500 px-4 py-2 text-[10px] uppercase tracking-[0.2em] text-green-400 font-black shadow-lg">
+        <div className="absolute top-6 left-6 z-50 bg-black/90 border border-green-500 px-4 py-2 text-[10px] uppercase text-green-400 font-black">
           Live_Map_Architect_Grid
         </div>
 
@@ -309,6 +279,8 @@ const Admin: React.FC = () => {
           nodes={nodes}
           edges={edges}
           onNodesChange={onNodesChange}
+          onEdgesChange={onEdgesChange}
+          onConnect={onConnect}
           onNodeDragStop={onNodeDragStop}
           fitView
         >
@@ -321,10 +293,6 @@ const Admin: React.FC = () => {
           />
           <Controls className="bg-zinc-900 border-2 border-green-900 fill-green-500" />
         </ReactFlow>
-
-        <div className="absolute bottom-6 right-6 z-50 text-[10px] text-green-900 opacity-50 select-none">
-          X_AXIS / Y_AXIS LOCK: ENABLED
-        </div>
       </div>
     </div>
   );
