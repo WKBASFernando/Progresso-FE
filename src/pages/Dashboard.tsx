@@ -48,11 +48,9 @@ const Dashboard: React.FC = () => {
   useEffect(() => {
     const loadData = async () => {
       try {
-        // Updated path to include the /api/progresso prefix
-        const userRes = await apiRequest("/api/progresso/auth/me");
-        setUser(userRes.data);
+        const userRes = await apiRequest("/api/progresso/user/me");
+        setUser(userRes);
 
-        // Updated path to include the /api/progresso prefix
         const skillsData = await apiRequest("/api/progresso/skill");
 
         // Map to Cartoon Nodes
@@ -104,24 +102,30 @@ const Dashboard: React.FC = () => {
         {"}"}
       </div>
 
-      {/* HEADER */}
-      <div className="bg-white p-4 z-20 border-b-4 border-black flex flex-col md:flex-row justify-between items-center shadow-md relative gap-4">
-        <h1 className="text-2xl font-black text-black flex items-center gap-2">
-          ⚡ Progresso{" "}
-          <span className="text-blue-600 bg-blue-100 px-2 border-2 border-black rounded-lg transform rotate-1">
+      {/* HEADER (UPDATED FOR COMPACT MOBILE VIEW) */}
+      <div className="bg-white p-2 md:p-4 z-20 border-b-4 border-black flex flex-row justify-between items-center shadow-md relative gap-2 md:gap-4">
+        {/* LOGO: Smaller text on mobile */}
+        <h1 className="text-lg md:text-2xl font-black text-black flex items-center gap-2">
+          ⚡ <span className="hidden xs:inline">Progresso</span>
+          <span className="text-blue-600 bg-blue-100 px-1 md:px-2 border-2 border-black rounded-lg transform rotate-1 text-xs md:text-base">
             Matrix
           </span>
         </h1>
 
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-2 md:gap-4">
           <Link
             to="/profile"
             className="flex items-center gap-2 hover:scale-105 transition"
           >
+            {/* HIDE NAME ON MOBILE */}
             <span className="font-bold text-sm hidden md:block">
-              {user ? `Lvl 1. ${user.firstname}` : "Syncing..."}
+              {user
+                ? `Lvl ${user.level || 1}. ${user.firstname}`
+                : "Syncing..."}
             </span>
-            <div className="w-10 h-10 bg-yellow-200 rounded-full border-2 border-black overflow-hidden shadow-[2px_2px_0px_0px_black]">
+
+            {/* AVATAR: Slightly smaller on mobile */}
+            <div className="w-8 h-8 md:w-10 md:h-10 bg-yellow-200 rounded-full border-2 border-black overflow-hidden shadow-[2px_2px_0px_0px_black]">
               <img
                 src={
                   user?.avatarUrl ||
@@ -130,17 +134,20 @@ const Dashboard: React.FC = () => {
                   }`
                 }
                 alt="Avatar"
+                className="w-full h-full object-cover"
               />
             </div>
           </Link>
+
+          {/* LOGOUT BUTTON: Compact on mobile */}
           <button
             onClick={() => {
               localStorage.clear();
               window.location.href = "/login";
             }}
-            className="text-sm font-bold text-black bg-red-100 border-2 border-black px-4 py-2 rounded-xl hover:bg-red-500 hover:text-white transition shadow-[3px_3px_0px_0px_black] active:shadow-none active:translate-x-[2px] active:translate-y-[2px]"
+            className="text-xs md:text-sm font-bold text-black bg-red-100 border-2 border-black px-2 py-1 md:px-4 md:py-2 rounded-lg md:rounded-xl hover:bg-red-500 hover:text-white transition shadow-[2px_2px_0px_0px_black] md:shadow-[3px_3px_0px_0px_black] active:shadow-none active:translate-x-[2px] active:translate-y-[2px]"
           >
-            LOGOUT
+            EXIT
           </button>
         </div>
       </div>
@@ -162,9 +169,9 @@ const Dashboard: React.FC = () => {
       </div>
 
       {/* FOOTER HINT */}
-      <div className="absolute bottom-6 left-1/2 -translate-x-1/2 z-20 pointer-events-none">
-        <p className="bg-black text-white px-4 py-2 rounded-full text-xs font-bold uppercase tracking-widest animate-pulse shadow-lg">
-          Click a node to begin transmission
+      <div className="absolute bottom-6 left-1/2 -translate-x-1/2 z-20 pointer-events-none w-full text-center px-4">
+        <p className="bg-black text-white px-4 py-2 rounded-full text-[10px] md:text-xs font-bold uppercase tracking-widest animate-pulse shadow-lg inline-block">
+          Tap a node to begin transmission
         </p>
       </div>
     </div>
