@@ -93,13 +93,26 @@ const Dashboard: React.FC = () => {
   };
 
   return (
-    <div className="h-screen w-screen flex flex-col font-sans relative overflow-hidden bg-white">
-      {/* DECORATIVE CODING ELEMENTS */}
-      <div className="absolute top-10 left-10 text-8xl font-mono font-black text-gray-100 opacity-50 z-0 select-none pointer-events-none">
-        {"< >"}
+    <div className="h-screen w-screen flex flex-col font-sans relative overflow-hidden bg-[#fffdf5]">
+      {/* --- DYNAMIC BACKGROUND PATTERN --- */}
+      {/* 1. Dot Grid Pattern (CSS-in-JS for SVG background) */}
+      <div
+        className="absolute inset-0 z-0 pointer-events-none opacity-40"
+        style={{
+          backgroundImage: `radial-gradient(#cbd5e1 1.5px, transparent 1.5px)`,
+          backgroundSize: "24px 24px",
+        }}
+      />
+
+      {/* 2. Floating Code Elements (Animated) */}
+      <div className="absolute top-20 left-10 text-6xl md:text-8xl font-black text-blue-200 opacity-20 animate-bounce-slow z-0 select-none pointer-events-none rotate-12">
+        {"< />"}
       </div>
-      <div className="absolute bottom-10 right-10 text-9xl font-mono font-black text-gray-100 opacity-50 z-0 select-none pointer-events-none">
-        {"}"}
+      <div className="absolute bottom-32 right-10 text-7xl md:text-9xl font-black text-pink-200 opacity-20 animate-pulse z-0 select-none pointer-events-none -rotate-6">
+        {"{ }"}
+      </div>
+      <div className="absolute bottom-10 left-20 text-5xl md:text-7xl font-black text-green-200 opacity-20 animate-spin-slow z-0 select-none pointer-events-none">
+        {";"}
       </div>
 
       {/* HEADER (COMPACT MOBILE + VISIBLE NAME) */}
@@ -117,9 +130,8 @@ const Dashboard: React.FC = () => {
             to="/profile"
             className="flex items-center gap-2 hover:scale-105 transition"
           >
-            {/* NAME SECTION: VISIBLE ON MOBILE NOW */}
+            {/* NAME SECTION */}
             <div className="text-right">
-              {/* Mobile: Just Name (text-xs) / Desktop: Lvl + Name (text-sm) */}
               <span className="block font-bold text-xs md:text-sm leading-tight">
                 {user ? (
                   <>
@@ -163,7 +175,7 @@ const Dashboard: React.FC = () => {
       </div>
 
       {/* REACT FLOW CANVAS */}
-      <div className="flex-grow h-full w-full z-10 bg-[#fafafa]">
+      <div className="flex-grow h-full w-full z-10 bg-transparent">
         <ReactFlow
           nodes={nodes}
           edges={edges}
@@ -173,7 +185,13 @@ const Dashboard: React.FC = () => {
           fitView
           defaultViewport={{ x: 0, y: 0, zoom: 1 }}
         >
-          <Background color="#000" gap={30} size={1} style={{ opacity: 0.1 }} />
+          {/* We keep the grid but make it subtle to blend with our custom background */}
+          <Background
+            color="#000"
+            gap={30}
+            size={1}
+            style={{ opacity: 0.05 }}
+          />
           <Controls className="border-2 border-black shadow-[4px_4px_0px_0px_black] bg-white" />
         </ReactFlow>
       </div>
