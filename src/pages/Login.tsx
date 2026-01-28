@@ -8,22 +8,38 @@ const Login: React.FC = () => {
   const [formData, setFormData] = useState({ email: "", password: "" });
   const [loading, setLoading] = useState(false);
 
+  // --- HELPER: HANDLE REDIRECT LOGIC ---
+  // Centralized logic to send players to the right world based on their role
+  const handleAuthSuccess = (res: any) => {
+    // 1. Store the token for future API requests
+    localStorage.setItem("accessToken", res.data.accessToken);
+
+    // 2. Store the role to help the ProtectedRoute in App.tsx
+    const role = res.data.roles[0];
+    localStorage.setItem("userRole", role);
+
+    // 3. Conditional Redirection
+    if (role === "ADMIN") {
+      navigate("/admin"); // Admins go to Forge
+    } else {
+      navigate("/dashboard"); // Standard players go to Matrix
+    }
+  };
+
   // --- GOOGLE LOGIN HANDLER ---
   const loginWithGoogle = useGoogleLogin({
     onSuccess: async (tokenResponse) => {
       setLoading(true);
       try {
-        // Updated path to include the /api/progresso prefix
+        // We use the access_token from the popup response to verify with our backend
         const res = await apiRequest("/api/progresso/auth/google", "POST", {
           token: tokenResponse.access_token,
         });
-        localStorage.setItem("accessToken", res.data.accessToken);
-
-        // Updated navigate to match your live dashboard route
-        navigate("/dashboard");
+        handleAuthSuccess(res);
       } catch (err) {
+        console.error("Google Auth Error:", err);
         alert(
-          "Google Sync Failed. Check if Redirect URIs are set in Google Console."
+          "Google Sync Failed. Check your connection or Google Console settings."
         );
       } finally {
         setLoading(false);
@@ -32,22 +48,19 @@ const Login: React.FC = () => {
     onError: () => alert("Google Popup Blocked or Closed"),
   });
 
+  // --- MANUAL LOGIN HANDLER ---
   const handleManualLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     try {
-      // Updated path to include the /api/progresso prefix
       const res = await apiRequest(
         "/api/progresso/auth/login",
         "POST",
         formData
       );
-      localStorage.setItem("accessToken", res.data.accessToken);
-
-      // Updated navigate to match your live dashboard route
-      navigate("/dashboard");
+      handleAuthSuccess(res);
     } catch (err: any) {
-      alert("Invalid Credentials");
+      alert("Invalid Credentials. Please check your email and password.");
     } finally {
       setLoading(false);
     }
@@ -80,7 +93,7 @@ const Login: React.FC = () => {
         ))}
       </div>
 
-      {/* --- FLOATING DECORATIONS --- */}
+      {/* --- DECORATIONS --- */}
       <div className="absolute top-10 left-10 text-6xl font-black text-blue-200 opacity-40 select-none animate-bounce">
         {"{ }"}
       </div>
@@ -100,11 +113,12 @@ const Login: React.FC = () => {
           <div className="h-2 w-20 bg-blue-400 mt-2 border-[2px] border-black rounded-full"></div>
         </header>
 
-        {/* CUTE GOOGLE BUTTON */}
+        {/* GOOGLE BUTTON */}
         <button
           type="button"
+          disabled={loading}
           onClick={() => loginWithGoogle()}
-          className="w-full py-4 mb-8 bg-white border-[4px] border-black rounded-2xl flex items-center justify-center gap-4 font-[900] uppercase shadow-[6px_6px_0px_0px_black] hover:translate-y-1 hover:shadow-none transition-all active:scale-95 group"
+          className="w-full py-4 mb-8 bg-white border-[4px] border-black rounded-2xl flex items-center justify-center gap-4 font-[900] uppercase shadow-[6px_6px_0px_0px_black] hover:translate-y-1 hover:shadow-none transition-all active:scale-95 group disabled:opacity-50"
         >
           <svg
             width="24"
@@ -132,11 +146,11 @@ const Login: React.FC = () => {
           <span className="tracking-tight">Sync Google Identity</span>
         </button>
 
-        {/* MANUAL FORM */}
         <form onSubmit={handleManualLogin} className="space-y-6">
           <input
             type="email"
             placeholder="PLAYER_EMAIL"
+            required
             className="w-full p-4 border-[3px] border-black rounded-2xl font-black bg-gray-50 outline-none focus:bg-white focus:shadow-[4px_4px_0px_0px_#60A5FA] transition-all"
             onChange={(e) =>
               setFormData({ ...formData, email: e.target.value })
@@ -145,6 +159,7 @@ const Login: React.FC = () => {
           <input
             type="password"
             placeholder="SECRET_KEY"
+            required
             className="w-full p-4 border-[3px] border-black rounded-2xl font-black bg-gray-50 outline-none focus:bg-white focus:shadow-[4px_4px_0px_0px_#F472B6] transition-all"
             onChange={(e) =>
               setFormData({ ...formData, password: e.target.value })
@@ -154,7 +169,7 @@ const Login: React.FC = () => {
           <button
             type="submit"
             disabled={loading}
-            className="w-full py-5 bg-[#4ADE80] border-[4px] border-black rounded-2xl font-[900] text-xl uppercase shadow-[6px_6px_0px_0px_black] hover:translate-y-1 hover:shadow-none transition-all active:bg-[#22C55E]"
+            className="w-full py-5 bg-[#4ADE80] border-[4px] border-black rounded-2xl font-[900] text-xl uppercase shadow-[6px_6px_0px_0px_black] hover:translate-y-1 hover:shadow-none transition-all active:bg-[#22C55E] disabled:opacity-50"
           >
             {loading ? "SYNCING..." : "Enter_Matrix"}
           </button>
